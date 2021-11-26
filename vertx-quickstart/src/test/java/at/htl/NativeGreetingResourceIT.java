@@ -1,4 +1,4 @@
-package org.acme;
+package at.htl;
 
 import io.quarkus.test.junit.NativeImageTest;
 
