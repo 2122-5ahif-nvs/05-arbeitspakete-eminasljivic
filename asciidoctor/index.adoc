@@ -2,6 +2,28 @@
 
 ## Websocktes
 
+### Why?
+
+If you have an usecase where the server needs to contact the client, you will need to implement a websocket. This is a
+lasting connection and can be closed by the client and server.
+
+Example:
+
+* Chat
+* Daily-Updates
+
+### How?
+
+### Why?
+
+If you have an endpoint with operations, which may take longer (I/O operations, CPU-calculations), you'll need to implement an async endpoint. Otherwise you would return an empty response with no data.
+
+### How?
+
+* Add extension
+```
+./mvnw quarkus:add-extension -Dextensions="websockets"
+```
 * Add new class
 * Annotate class with:
 ```java
@@ -57,5 +79,30 @@ private void broadcast(String message) {
                 }
             });
         });
+    }
+```
+
+## Vertx
+
+* Add service class with `@ApplicationScoped` annotation
+* Inject a `ManagedExecutor`
+* Create a method called consumes, which performs an async operation. Example:
+```java
+@ConsumeEvent("greeting")
+    public Uni<String> consume(String name) throws InterruptedException {
+        Thread.sleep(1000);
+        return Uni.createFrom().item(name::toUpperCase).emitOn(executor);
+    }
+```
+* Add resource class with `@Path(<resource-path>)` annotation
+* Inject a `EventBus`
+* Create an endpoint which calls the async operation which the EventBus. Example:
+```java
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{name}")
+    public Uni<String> greeting(@PathParam("name") String name) {
+        return bus.<String>request("greeting", name)
+                .onItem().transform(Message::body);
     }
 ```
