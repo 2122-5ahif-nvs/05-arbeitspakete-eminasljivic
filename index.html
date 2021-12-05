@@ -444,6 +444,50 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_websocktes">Websocktes</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_why">Why?</h3>
+<div class="paragraph">
+<p>If you have an usecase where the server needs to contact the client, you will need to implement a websocket. This is a
+lasting connection and can be closed by the client and server.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Chat</p>
+</li>
+<li>
+<p>Daily-Updates</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how">How?</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_why_2">Why?</h3>
+<div class="paragraph">
+<p>If you have an endpoint with operations, which may take longer (I/O operations, CPU-calculations), you&#8217;ll need to implement an async endpoint. Otherwise you would return an empty response with no data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_2">How?</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Add extension</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>./mvnw quarkus:add-extension -Dextensions="websockets"</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -550,9 +594,61 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_vertx">Vertx</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Add service class with <code>@ApplicationScoped</code> annotation</p>
+</li>
+<li>
+<p>Inject a <code>ManagedExecutor</code></p>
+</li>
+<li>
+<p>Create a method called consumes, which performs an async operation. Example:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@ConsumeEvent("greeting")
+    public Uni&lt;String&gt; consume(String name) throws InterruptedException {
+        Thread.sleep(1000);
+        return Uni.createFrom().item(name::toUpperCase).emitOn(executor);
+    }</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add resource class with <code>@Path(&lt;resource-path&gt;)</code> annotation</p>
+</li>
+<li>
+<p>Inject a <code>EventBus</code></p>
+</li>
+<li>
+<p>Create an endpoint which calls the async operation which the EventBus. Example:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{name}")
+    public Uni&lt;String&gt; greeting(@PathParam("name") String name) {
+        return bus.&lt;String&gt;request("greeting", name)
+                .onItem().transform(Message::body);
+    }</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-05 19:01:09 UTC
+Last updated 2021-12-05 19:35:11 UTC
 </div>
 </div>
 </body>
