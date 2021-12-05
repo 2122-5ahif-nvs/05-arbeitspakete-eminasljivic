@@ -1,0 +1,61 @@
+# Lernpakete - Emina Sljivic
+
+## Websocktes
+
+* Add new class
+* Annotate class with:
+```java
+@ApplicationScoped
+@ServerEndpoint(<websocket-path>)
+```
+*  Add session Map, to save all clients, who open a connection
+```java
+Map<String, Session> sessions = new ConcurrentHashMap<>();
+```
+* Implement basic methods
+```java
+    @OnOpen
+    public void onOpen(Session session, @PathParam("name") String name) {
+        sessions.put(name, session);
+    }
+
+    @OnClose
+    public void onClose(Session session, @PathParam("name") String name) {
+        sessions.remove(name);
+    }
+
+    @OnError
+    public void onError(Session session, @PathParam("name") String name, Throwable throwable) {
+        sessions.remove(name);
+    }
+
+    @OnMessage
+    public void onMessage(String message, @PathParam("name") String name) {
+        if (!message.equalsIgnoreCase("_ready_")) {
+            // Do stuff
+        }
+    }
+```
+
+* Contact clients:
+** Single
+```
+sessions.get(username).getAsyncRemote().sendObject(message, result ->  {
+    if (result.getException() != null) {
+        System.out.println("Unable to send message: " + result.getException());
+    }
+});
+```
+
+** All
+```java
+private void broadcast(String message) {
+        sessions.values().forEach(s -> {
+            s.getAsyncRemote().sendObject(message, result ->  {
+                if (result.getException() != null) {
+                    System.out.println("Unable to send message: " + result.getException());
+                }
+            });
+        });
+    }
+```
