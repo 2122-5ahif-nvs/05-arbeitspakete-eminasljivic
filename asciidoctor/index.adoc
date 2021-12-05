@@ -14,12 +14,6 @@ Example:
 
 ### How?
 
-### Why?
-
-If you have an endpoint with operations, which may take longer (I/O operations, CPU-calculations), you'll need to implement an async endpoint. Otherwise you would return an empty response with no data.
-
-### How?
-
 * Add extension
 ```
 ./mvnw quarkus:add-extension -Dextensions="websockets"
@@ -83,6 +77,12 @@ private void broadcast(String message) {
 ```
 
 ## Vertx
+
+### Why?
+
+If you have an endpoint with operations, which may take longer (I/O operations, CPU-calculations), you'll need to implement an async endpoint. Otherwise you would return an empty response with no data.
+
+### How?
 
 * Add service class with `@ApplicationScoped` annotation
 * Inject a `ManagedExecutor`
